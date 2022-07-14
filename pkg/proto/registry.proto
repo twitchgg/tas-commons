@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "cn.ac.ntsc.ta.proto";
+option java_outer_classname = "RegistryProto";
+option go_package = "./;pb";
+
+import "pkg/proto/registry_types.proto";
+import "pkg/proto/router_types.proto";
+import "pkg/proto/server_types.proto";
+
+service RegistryService {
+  // RegistRouter regist wireguard router
+  rpc RegistRouter(ta.registry.types.RegistRouterRequest)
+      returns (ta.router.types.RouterConfig) {}
+
+  // RegistServer regist server
+  rpc RegistServer(ta.registry.types.RegistServerRequest)
+      returns (ta.server.types.ServerConfig) {}
+}

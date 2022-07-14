@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "cn.ac.ntsc.ta.proto";
+option java_outer_classname = "MonitorProto";
+option go_package = "./;pb";
+
+import "google/protobuf/timestamp.proto";
+
+service MonitorService {
+  rpc Report(stream OIDRequest) returns (OIDReply) {}
+}
+
+message OIDRequest {
+  string machineID = 1;
+  string oid = 2;
+  string valueType = 3;
+  string value = 4;
+}
+
+message OIDReply {
+  google.protobuf.Timestamp sysTime = 1;
+}

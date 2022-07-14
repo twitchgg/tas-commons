@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "cn.ac.ntsc.ta.proto";
+option java_outer_classname = "RouterTypesProto";
+option go_package = "./;pb";
+
+package ta.router.types;
+
+// RouterConfig wireguard router config
+message RouterConfig {
+  // wgConfig wireguard config
+  repeated WireguardConfig wgConfig = 1;
+  // iptablesRules iptables rules config
+  IPTablesRules iptablesRules = 2;
+  // dnsServer DNS server (query TA service)
+  repeated string dnsServer = 3;
+  // wanInfo wan interface info
+  EthernetCard wanInfo = 4;
+  // LanInfos lan interfaces config
+  repeated EthernetCard LanInfos = 5;
+}
+
+// WireguardConfig wireguard all config
+message WireguardConfig {
+  // name wireguard interface name
+  string name = 1;
+  // interfaceDef wireguard interface config
+  WireguardInterface interfaceDef = 2;
+  // peers wireguard peers config
+  repeated WireguardPeer peers = 3;
+}
+
+// WireguardInterface wireguard interface config
+message WireguardInterface {
+  // address wireguard interface address
+  string address = 1;
+  // port wireguard listener port
+  int32 port = 2;
+  // privKey private key
+  string privKey = 3;
+}
+
+// WireguardPeer wireguad peer config
+message WireguardPeer {
+  // name peer name
+  string name = 1;
+  // desc peer description
+  string desc = 2;
+  // pubKey wireguard endpoint public key (server key)
+  string pubKey = 3;
+  // psKey wireguard preshared key
+  string psKey = 4;
+  // endpoint wireguard server address and port (port default 51820)
+  string endpoint = 5;
+  // peerAddr peer address
+  string peerAddr = 6;
+  // allowIPs peer allow ips (iptables rules)
+  repeated string allowIPs = 7;
+  // keepalive connection keepalive time (second)
+  int32 keepalive = 8;
+}
+
+// IPTablesRules iptables rules config
+message IPTablesRules {
+  // masqueraedInterfaces NAT masqueraed interface names
+  repeated string masqueraedInterfaces = 1;
+  // whiteList iptable filter table enable white list
+  bool whiteList = 2;
+}
+
+// EthernetCard ethernet card config
+message EthernetCard {
+  // name ethernet card name
+  string name = 1;
+  // address ipv4/netmask
+  repeated string addresses = 2;
+  // gateway ipv4 gateway address
+  string gateway = 3;
+  // dhcpClient dhcp client application name (if need)
+  string dhcpClient = 4;
+}

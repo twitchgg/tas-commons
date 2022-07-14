@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "cn.ac.ntsc.ta.proto";
+option java_outer_classname = "ServerTypesProto";
+option go_package = "./;pb";
+
+package ta.server.types;
+
+message ServerConfig {
+  repeated ServiceMode serviceMode = 1;
+  repeated MiddleWareMode middleWareMode = 2;
+}
+
+message ServiceMode {
+  string name = 1;
+}
+
+message MiddleWareMode {
+  string name = 1;
+}
