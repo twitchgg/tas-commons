@@ -6,9 +6,18 @@ option java_outer_classname = "CommonViewProto";
 option go_package = "./;pb";
 
 service CommonViewDataService {
-  rpc PushMainStationData(PushRequest) returns (stream CommonViewRawData);
+  rpc PushStationData(PushRequest) returns (stream CommonViewRawData);
+  rpc PullStationData(stream CommonViewRawData) returns (PushRequest);
 }
 
 message PushRequest { string machineID = 1; }
 
-message CommonViewRawData { bytes data = 1; }
+message CommonViewRawData {
+  bytes data = 1;
+  string machineID = 2;
+  CVMode mode = 3;
+  enum CVMode {
+    GPS = 0;
+    BEIDOU = 1;
+  }
+}

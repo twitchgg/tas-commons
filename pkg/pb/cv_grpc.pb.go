@@ -22,7 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CommonViewDataServiceClient interface {
-	PushMainStationData(ctx context.Context, in *PushRequest, opts ...grpc.CallOption) (CommonViewDataService_PushMainStationDataClient, error)
+	PushStationData(ctx context.Context, in *PushRequest, opts ...grpc.CallOption) (CommonViewDataService_PushStationDataClient, error)
+	PullStationData(ctx context.Context, opts ...grpc.CallOption) (CommonViewDataService_PullStationDataClient, error)
 }
 
 type commonViewDataServiceClient struct {
@@ -33,12 +34,12 @@ func NewCommonViewDataServiceClient(cc grpc.ClientConnInterface) CommonViewDataS
 	return &commonViewDataServiceClient{cc}
 }
 
-func (c *commonViewDataServiceClient) PushMainStationData(ctx context.Context, in *PushRequest, opts ...grpc.CallOption) (CommonViewDataService_PushMainStationDataClient, error) {
-	stream, err := c.cc.NewStream(ctx, &CommonViewDataService_ServiceDesc.Streams[0], "/CommonViewDataService/PushMainStationData", opts...)
+func (c *commonViewDataServiceClient) PushStationData(ctx context.Context, in *PushRequest, opts ...grpc.CallOption) (CommonViewDataService_PushStationDataClient, error) {
+	stream, err := c.cc.NewStream(ctx, &CommonViewDataService_ServiceDesc.Streams[0], "/CommonViewDataService/PushStationData", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &commonViewDataServicePushMainStationDataClient{stream}
+	x := &commonViewDataServicePushStationDataClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -48,17 +49,51 @@ func (c *commonViewDataServiceClient) PushMainStationData(ctx context.Context, i
 	return x, nil
 }
 
-type CommonViewDataService_PushMainStationDataClient interface {
+type CommonViewDataService_PushStationDataClient interface {
 	Recv() (*CommonViewRawData, error)
 	grpc.ClientStream
 }
 
-type commonViewDataServicePushMainStationDataClient struct {
+type commonViewDataServicePushStationDataClient struct {
 	grpc.ClientStream
 }
 
-func (x *commonViewDataServicePushMainStationDataClient) Recv() (*CommonViewRawData, error) {
+func (x *commonViewDataServicePushStationDataClient) Recv() (*CommonViewRawData, error) {
 	m := new(CommonViewRawData)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *commonViewDataServiceClient) PullStationData(ctx context.Context, opts ...grpc.CallOption) (CommonViewDataService_PullStationDataClient, error) {
+	stream, err := c.cc.NewStream(ctx, &CommonViewDataService_ServiceDesc.Streams[1], "/CommonViewDataService/PullStationData", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &commonViewDataServicePullStationDataClient{stream}
+	return x, nil
+}
+
+type CommonViewDataService_PullStationDataClient interface {
+	Send(*CommonViewRawData) error
+	CloseAndRecv() (*PushRequest, error)
+	grpc.ClientStream
+}
+
+type commonViewDataServicePullStationDataClient struct {
+	grpc.ClientStream
+}
+
+func (x *commonViewDataServicePullStationDataClient) Send(m *CommonViewRawData) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *commonViewDataServicePullStationDataClient) CloseAndRecv() (*PushRequest, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(PushRequest)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -69,15 +104,19 @@ func (x *commonViewDataServicePushMainStationDataClient) Recv() (*CommonViewRawD
 // All implementations should embed UnimplementedCommonViewDataServiceServer
 // for forward compatibility
 type CommonViewDataServiceServer interface {
-	PushMainStationData(*PushRequest, CommonViewDataService_PushMainStationDataServer) error
+	PushStationData(*PushRequest, CommonViewDataService_PushStationDataServer) error
+	PullStationData(CommonViewDataService_PullStationDataServer) error
 }
 
 // UnimplementedCommonViewDataServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedCommonViewDataServiceServer struct {
 }
 
-func (UnimplementedCommonViewDataServiceServer) PushMainStationData(*PushRequest, CommonViewDataService_PushMainStationDataServer) error {
-	return status.Errorf(codes.Unimplemented, "method PushMainStationData not implemented")
+func (UnimplementedCommonViewDataServiceServer) PushStationData(*PushRequest, CommonViewDataService_PushStationDataServer) error {
+	return status.Errorf(codes.Unimplemented, "method PushStationData not implemented")
+}
+func (UnimplementedCommonViewDataServiceServer) PullStationData(CommonViewDataService_PullStationDataServer) error {
+	return status.Errorf(codes.Unimplemented, "method PullStationData not implemented")
 }
 
 // UnsafeCommonViewDataServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -91,25 +130,51 @@ func RegisterCommonViewDataServiceServer(s grpc.ServiceRegistrar, srv CommonView
 	s.RegisterService(&CommonViewDataService_ServiceDesc, srv)
 }
 
-func _CommonViewDataService_PushMainStationData_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _CommonViewDataService_PushStationData_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(PushRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(CommonViewDataServiceServer).PushMainStationData(m, &commonViewDataServicePushMainStationDataServer{stream})
+	return srv.(CommonViewDataServiceServer).PushStationData(m, &commonViewDataServicePushStationDataServer{stream})
 }
 
-type CommonViewDataService_PushMainStationDataServer interface {
+type CommonViewDataService_PushStationDataServer interface {
 	Send(*CommonViewRawData) error
 	grpc.ServerStream
 }
 
-type commonViewDataServicePushMainStationDataServer struct {
+type commonViewDataServicePushStationDataServer struct {
 	grpc.ServerStream
 }
 
-func (x *commonViewDataServicePushMainStationDataServer) Send(m *CommonViewRawData) error {
+func (x *commonViewDataServicePushStationDataServer) Send(m *CommonViewRawData) error {
 	return x.ServerStream.SendMsg(m)
+}
+
+func _CommonViewDataService_PullStationData_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(CommonViewDataServiceServer).PullStationData(&commonViewDataServicePullStationDataServer{stream})
+}
+
+type CommonViewDataService_PullStationDataServer interface {
+	SendAndClose(*PushRequest) error
+	Recv() (*CommonViewRawData, error)
+	grpc.ServerStream
+}
+
+type commonViewDataServicePullStationDataServer struct {
+	grpc.ServerStream
+}
+
+func (x *commonViewDataServicePullStationDataServer) SendAndClose(m *PushRequest) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *commonViewDataServicePullStationDataServer) Recv() (*CommonViewRawData, error) {
+	m := new(CommonViewRawData)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // CommonViewDataService_ServiceDesc is the grpc.ServiceDesc for CommonViewDataService service.
@@ -121,9 +186,14 @@ var CommonViewDataService_ServiceDesc = grpc.ServiceDesc{
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "PushMainStationData",
-			Handler:       _CommonViewDataService_PushMainStationData_Handler,
+			StreamName:    "PushStationData",
+			Handler:       _CommonViewDataService_PushStationData_Handler,
 			ServerStreams: true,
+		},
+		{
+			StreamName:    "PullStationData",
+			Handler:       _CommonViewDataService_PullStationData_Handler,
+			ClientStreams: true,
 		},
 	},
 	Metadata: "pkg/proto/cv.proto",

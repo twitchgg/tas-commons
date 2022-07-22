@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "cn.ac.ntsc.ta.proto";
+option java_outer_classname = "DeviceHealthCheckProto";
+option go_package = "./;pb";
+
+service DeviceHealth {
+  rpc Watch(stream DeviceReportRequest) returns (DeviceReportResponse);
+}
+
+message InitRequest {}
+
+message DeviceReportRequest { string machineID = 1; }
+
+message DeviceService {
+  string name = 1;
+  enum ServingStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+    SERVICE_UNKNOWN = 3; // Used only by the Watch method.
+  }
+  ServingStatus status = 2;
+  string reason = 3;
+}
+
+message DeviceReportResponse {}
